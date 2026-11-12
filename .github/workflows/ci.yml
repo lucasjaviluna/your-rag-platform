@@ -1,0 +1,24 @@
+name: CI
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: dotnet test tests/RagPlatform.Tests/RagPlatform.Tests.csproj
+      - run: python -m unittest discover -s workers/rag_worker/tests
+      - name: Verify database bootstrap
+        run: |
+          cp .env.example .env
+          docker compose up -d --wait
+          docker compose exec -T postgres psql -U rag_local -d rag_platform -c "SELECT extversion FROM pg_extension WHERE extname = 'vector';"
+      - if: always()
+        run: docker compose down
