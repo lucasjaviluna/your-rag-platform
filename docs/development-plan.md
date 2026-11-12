@@ -16,13 +16,17 @@
 - [x] Migración SQL inicial para documentos, versiones, secciones, chunks y permisos individuales de lectura.
 - [x] Consulta de chunks autorizados: permisos explícitos y versiones aprobadas; denegación por defecto y revocación inmediata en base de datos.
 - [x] Prueba SQL de concesión, aislamiento, identidad ausente, borradores y revocación; incluida en CI.
+- [x] Endpoint experimental `/dev/chunks` usa la consulta autorizada con una identidad fija configurada en servidor, sólo en entorno Development; sin identidad o conexión, responde 503. Nunca acepta identidad desde el request.
+- [x] Tests definidos para ausencia de endpoint en Production y configuración ausente en Development.
 - [ ] Ejecutar y verificar migración y pruebas con PostgreSQL real; este entorno no dispone de Docker/PostgreSQL.
 - [ ] Incorporar gestor de migraciones versionadas para actualizaciones seguras y repetibles.
-- [ ] Integrar autenticación verificada y consulta autorizada en la API; no aceptar identidad de un parámetro controlado por el cliente.
+- [ ] Integrar autenticación verificada y consulta autorizada en una API de producción; no aceptar identidad de un parámetro controlado por el cliente.
+- [x] Prueba HTTP con PostgreSQL para concesión y revocación definida e integrada en CI; se omite localmente si `RAG_TEST_DATABASE` no está configurada.
+- [ ] Verificar ejecución de la prueba HTTP, restauración y compilación .NET en CI.
 - [ ] Agregar grupos, herencia/sincronización de ACL de fuente, auditoría y protección de acceso directo a tablas.
 - [ ] Tests de integración reales para identidad, expansión y revocación en el flujo completo.
 
-La función SQL es una consulta de aplicación, no una barrera autónoma de seguridad: el acceso directo a tablas debe restringirse y la identidad debe ser confiable. Por ahora no se expone ningún endpoint documental. Todo permanece limitado a datos sintéticos.
+La función SQL es una consulta de aplicación, no una barrera autónoma de seguridad: el acceso directo a tablas debe restringirse y la identidad debe ser confiable. El endpoint experimental no autentica usuarios y sólo sirve para una identidad configurada en el proceso. Todo permanece limitado a datos sintéticos.
 
 ## Hito 2 — Ingesta y chunking (pendiente)
 

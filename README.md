@@ -26,7 +26,11 @@ docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U rag_local -d rag_plat
 docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U rag_local -d rag_platform < tests/database/document_model.sql
 ```
 
-Estos comandos usan las credenciales de ejemplo; ajustarlas si se cambió `.env`. El test hace rollback de sus datos. La migración aún no tiene gestor de versiones ni integración con la API. La consulta autorizada requiere una identidad verificada por el llamador y permisos de base de datos restrictivos que aún no están implementados. No usar con datos reales.
+Estos comandos usan las credenciales de ejemplo; ajustarlas si se cambió `.env`. El test hace rollback de sus datos. La migración aún no tiene gestor de versiones. No usar con datos reales.
+
+Para probar la consulta desde la API, configurar `DevelopmentIdentity__PrincipalId` con una identidad sintética y `ConnectionStrings__RagPlatform` con una conexión local de PostgreSQL, y ejecutar la API en Development. `GET /dev/chunks` devuelve hasta 100 chunks aprobados y autorizados para esa identidad fija. Deben existir datos y permisos sintéticos cargados previamente; el test SQL no los conserva. El endpoint no se registra fuera de Development y no autentica usuarios. No exponerlo a redes compartidas: cualquier cliente local que acceda hereda esa identidad. La consulta requiere autenticación real y permisos de base de datos restrictivos antes de un uso corporativo.
+
+La prueba HTTP de base de datos sólo se ejecuta si `RAG_TEST_DATABASE` contiene la conexión a una base de pruebas con la migración aplicada. CI configura esta variable explícitamente. La prueba crea datos sintéticos y los elimina al finalizar; usar una base dedicada a tests.
 
 Compose publica PostgreSQL sólo en localhost. Su volumen persiste al detener los contenedores. No usar estas credenciales ni esta configuración en producción.
 

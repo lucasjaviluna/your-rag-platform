@@ -13,7 +13,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: dotnet test tests/RagPlatform.Tests/RagPlatform.Tests.csproj
       - run: python -m unittest discover -s workers/rag_worker/tests
       - name: Verify database bootstrap
         run: |
@@ -22,5 +21,9 @@ jobs:
           docker compose exec -T postgres psql -U rag_local -d rag_platform -c "SELECT extversion FROM pg_extension WHERE extname = 'vector';"
           docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U rag_local -d rag_platform < infra/postgres/migrations/001_document_model.sql
           docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U rag_local -d rag_platform < tests/database/document_model.sql
+      - name: Test API and database integration
+        env:
+          RAG_TEST_DATABASE: Host=localhost;Port=5432;Database=rag_platform;Username=rag_local;Password=change-this-local-password
+        run: dotnet test tests/RagPlatform.Tests/RagPlatform.Tests.csproj
       - if: always()
         run: docker compose down
