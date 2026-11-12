@@ -20,5 +20,7 @@ jobs:
           cp .env.example .env
           docker compose up -d --wait
           docker compose exec -T postgres psql -U rag_local -d rag_platform -c "SELECT extversion FROM pg_extension WHERE extname = 'vector';"
+          docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U rag_local -d rag_platform < infra/postgres/migrations/001_document_model.sql
+          docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U rag_local -d rag_platform < tests/database/document_model.sql
       - if: always()
         run: docker compose down

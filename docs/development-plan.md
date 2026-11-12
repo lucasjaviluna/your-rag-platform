@@ -11,9 +11,18 @@
 - [ ] Ejecutar CI y verificar restauración, compilación .NET y Compose en un entorno con Docker y SDK 10.
 - [ ] Validar políticas de versiones, licencias e imágenes; fijar digest cuando se establezca la política de actualizaciones.
 
-## Hito 1 — Modelo y seguridad (pendiente)
+## Hito 1 — Modelo y seguridad (en curso)
 
-Diseñar documentos, versiones, secciones, chunks, procedencia, estados y ACL; agregar migraciones y consultas autorizadas. Diseñar identidad para desarrollo y autorización fail-closed; probar denegación y revocación. No confundir identidad sintética con autenticación corporativa.
+- [x] Migración SQL inicial para documentos, versiones, secciones, chunks y permisos individuales de lectura.
+- [x] Consulta de chunks autorizados: permisos explícitos y versiones aprobadas; denegación por defecto y revocación inmediata en base de datos.
+- [x] Prueba SQL de concesión, aislamiento, identidad ausente, borradores y revocación; incluida en CI.
+- [ ] Ejecutar y verificar migración y pruebas con PostgreSQL real; este entorno no dispone de Docker/PostgreSQL.
+- [ ] Incorporar gestor de migraciones versionadas para actualizaciones seguras y repetibles.
+- [ ] Integrar autenticación verificada y consulta autorizada en la API; no aceptar identidad de un parámetro controlado por el cliente.
+- [ ] Agregar grupos, herencia/sincronización de ACL de fuente, auditoría y protección de acceso directo a tablas.
+- [ ] Tests de integración reales para identidad, expansión y revocación en el flujo completo.
+
+La función SQL es una consulta de aplicación, no una barrera autónoma de seguridad: el acceso directo a tablas debe restringirse y la identidad debe ser confiable. Por ahora no se expone ningún endpoint documental. Todo permanece limitado a datos sintéticos.
 
 ## Hito 2 — Ingesta y chunking (pendiente)
 
