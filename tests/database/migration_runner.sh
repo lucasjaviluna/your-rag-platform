@@ -5,6 +5,7 @@ set -euo pipefail
 test_dir=$(mktemp -d)
 trap 'rm -rf -- "$test_dir"' EXIT
 cp infra/postgres/migrations/001_document_model.sql "$test_dir/001_document_model.sql"
+cp infra/postgres/migrations/002_group_read_grants.sql "$test_dir/002_group_read_grants.sql"
 
 # A changed historical file must be rejected before anything else runs.
 printf '\n-- checksum change\n' >> "$test_dir/001_document_model.sql"
@@ -13,7 +14,7 @@ if dotnet run --project src/RagPlatform.Migrations -- "$test_dir"; then
   exit 1
 fi
 cp infra/postgres/migrations/001_document_model.sql "$test_dir/001_document_model.sql"
-cp tests/database/migration_failure.sql.fixture "$test_dir/002_failure.sql"
+cp tests/database/migration_failure.sql.fixture "$test_dir/003_failure.sql"
 if dotnet run --project src/RagPlatform.Migrations -- "$test_dir"; then
   echo 'Failing migration unexpectedly accepted' >&2
   exit 1
@@ -23,15 +24,15 @@ DO $$ BEGIN
   IF to_regclass('public.migration_test_rollback') IS NOT NULL THEN
     RAISE EXCEPTION 'Failed migration was not rolled back';
   END IF;
-  IF EXISTS (SELECT 1 FROM rag_schema_migrations WHERE name = '002_failure.sql') THEN
+  IF EXISTS (SELECT 1 FROM rag_schema_migrations WHERE name = '003_failure.sql') THEN
     RAISE EXCEPTION 'Failed migration was recorded';
   END IF;
 END $$;
 SQL
 
 # Two simultaneous runners must serialize and apply the second file only once.
-cp tests/database/migration_concurrency.sql.fixture "$test_dir/002_concurrent.sql"
-rm -- "$test_dir/002_failure.sql"
+cp tests/database/migration_concurrency.sql.fixture "$test_dir/003_concurrent.sql"
+rm -- "$test_dir/003_failure.sql"
 dotnet run --project src/RagPlatform.Migrations -- "$test_dir" &
 first=$!
 dotnet run --project src/RagPlatform.Migrations -- "$test_dir" &
@@ -45,5 +46,5 @@ DO $$ BEGIN
   END IF;
 END $$;
 DROP TABLE migration_test_concurrency;
-DELETE FROM rag_schema_migrations WHERE name = '002_concurrent.sql';
+DELETE FROM rag_schema_migrations WHERE name = '003_concurrent.sql';
 SQL
