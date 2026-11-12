@@ -1,0 +1,2 @@
+CREATE TABLE migration_test_rollback (id integer);
+SELECT 1 / 0;

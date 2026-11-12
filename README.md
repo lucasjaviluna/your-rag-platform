@@ -19,14 +19,16 @@ La API y el worker son esqueletos independientes. `/health` sólo indica que cad
 
 ## Modelo documental experimental
 
-En una base local recién creada, aplicar la migración una sola vez:
+En una base local recién creada, configurar `RAG_MIGRATIONS_DATABASE` con la conexión PostgreSQL y ejecutar desde la raíz:
 
 ```bash
-docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U rag_local -d rag_platform < infra/postgres/migrations/001_document_model.sql
+dotnet run --project src/RagPlatform.Migrations
 docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U rag_local -d rag_platform < tests/database/document_model.sql
 ```
 
-Estos comandos usan las credenciales de ejemplo; ajustarlas si se cambió `.env`. El test hace rollback de sus datos. La migración aún no tiene gestor de versiones. No usar con datos reales.
+El comando de pruebas usa las credenciales de ejemplo; ajustarlas si se cambió `.env`. El test hace rollback de sus datos. El ejecutor aplica cada archivo una sola vez en una transacción, registra su checksum y rechaza cambios posteriores. Usa una conexión con permisos de migración; no utilices esas credenciales para la API en producción. No usar con datos reales.
+
+Si ya aplicaste manualmente la versión anterior de `001_document_model.sql`, el ejecutor no la adopta automáticamente: detectará que las tablas ya existen y detendrá la ejecución. Conservar la base y resolver su adopción explícitamente tras verificar esquema y datos; no borrar volúmenes para corregir esto. Para una prueba nueva, usa una base de datos vacía dedicada.
 
 Para probar la consulta desde la API, configurar `DevelopmentIdentity__PrincipalId` con una identidad sintética y `ConnectionStrings__RagPlatform` con una conexión local de PostgreSQL, y ejecutar la API en Development. `GET /dev/chunks` devuelve hasta 100 chunks aprobados y autorizados para esa identidad fija. Deben existir datos y permisos sintéticos cargados previamente; el test SQL no los conserva. El endpoint no se registra fuera de Development y no autentica usuarios. No exponerlo a redes compartidas: cualquier cliente local que acceda hereda esa identidad. La consulta requiere autenticación real y permisos de base de datos restrictivos antes de un uso corporativo.
 

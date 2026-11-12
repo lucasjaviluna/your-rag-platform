@@ -19,8 +19,14 @@ jobs:
           cp .env.example .env
           docker compose up -d --wait
           docker compose exec -T postgres psql -U rag_local -d rag_platform -c "SELECT extversion FROM pg_extension WHERE extname = 'vector';"
-          docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U rag_local -d rag_platform < infra/postgres/migrations/001_document_model.sql
+      - name: Apply migrations twice
+        env:
+          RAG_MIGRATIONS_DATABASE: Host=localhost;Port=5432;Database=rag_platform;Username=rag_local;Password=change-this-local-password
+        run: |
+          dotnet run --project src/RagPlatform.Migrations
+          dotnet run --project src/RagPlatform.Migrations
           docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U rag_local -d rag_platform < tests/database/document_model.sql
+          bash tests/database/migration_runner.sh
       - name: Test API and database integration
         env:
           RAG_TEST_DATABASE: Host=localhost;Port=5432;Database=rag_platform;Username=rag_local;Password=change-this-local-password

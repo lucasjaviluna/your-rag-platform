@@ -1,5 +1,4 @@
--- Apply as a transaction. Bootstrap is intended for a fresh local database.
-BEGIN;
+-- Applied transactionally by RagPlatform.Migrations to a fresh local database.
 
 CREATE TABLE documents (
     id uuid PRIMARY KEY,
@@ -74,5 +73,3 @@ LANGUAGE sql STABLE AS $$
       AND EXISTS (SELECT 1 FROM document_read_grants g
                   WHERE g.document_id = d.id AND g.principal_id = p_principal_id);
 $$;
-
-COMMIT;

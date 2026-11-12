@@ -1,0 +1,2 @@
+CREATE TABLE migration_test_concurrency (id integer);
+INSERT INTO migration_test_concurrency VALUES (1);

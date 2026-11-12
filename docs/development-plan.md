@@ -19,7 +19,8 @@
 - [x] Endpoint experimental `/dev/chunks` usa la consulta autorizada con una identidad fija configurada en servidor, sólo en entorno Development; sin identidad o conexión, responde 503. Nunca acepta identidad desde el request.
 - [x] Tests definidos para ausencia de endpoint en Production y configuración ausente en Development.
 - [ ] Ejecutar y verificar migración y pruebas con PostgreSQL real; este entorno no dispone de Docker/PostgreSQL.
-- [ ] Incorporar gestor de migraciones versionadas para actualizaciones seguras y repetibles.
+- [x] Ejecutor de migraciones SQL con historial, checksum, bloqueo entre procesos y transacciones; CI define pruebas de repetición, alteración, rollback y concurrencia.
+- [ ] Verificar el ejecutor con PostgreSQL, incluidos fallos, concurrencia y migración desde bases existentes; la adopción de esquemas aplicados manualmente aún no está implementada.
 - [ ] Integrar autenticación verificada y consulta autorizada en una API de producción; no aceptar identidad de un parámetro controlado por el cliente.
 - [x] Prueba HTTP con PostgreSQL para concesión y revocación definida e integrada en CI; se omite localmente si `RAG_TEST_DATABASE` no está configurada.
 - [ ] Verificar ejecución de la prueba HTTP, restauración y compilación .NET en CI.
